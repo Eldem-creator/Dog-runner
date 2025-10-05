@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dino Game — Profondeur Réaliste</title>
+<style>
+:root{--bg:#87ceeb;--card-bg:#f9f9f9;--text:#222;--primary:#2b8bf2;--ground:#cce0aa}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Segoe UI', Arial, sans-serif;background:var(--bg);color:var(--text)}
+.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;flex-direction:column}
+.card{
+  width:400px; max-width:90vw;
+  background: linear-gradient(145deg,#f9f9f9,#e0e0e0);
+  border-radius:16px;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.12), 0 6px 12px rgba(0,0,0,0.08);
+  padding:32px 24px;
+  margin-bottom:24px;
+  text-align:center;
+  transition: transform 0.3s ease;
+}
+.card:hover{transform: translateY(-4px);}
+h1,h2{margin:0 0 20px 0;color:#333}
+input, select{
+  width:90%;
+  padding:12px;
+  margin:10px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+  transition: border 0.3s, box-shadow 0.3s;
+  font-size:14px;
+}
+input:focus,select:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 6px rgba(43,139,242,0.4);
+}
+button{
+  width:60%;
+  background:var(--primary);
+  color:white;
+  border:0;
+  padding:12px;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  margin-top:16px;
+  transition: background 0.3s, transform 0.2s;
+}
+button:hover{background:#1e6fc1;transform: translateY(-2px);}
+#verify-section{margin-top:16px;}
+.footer{margin-top:12px;font-size:14px;color:#555}
+.hint{font-size:12px;color:#666;margin-top:6px}
+canvas{display:block;width:100%;height:300px;border-radius:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Accueil / Inscription -->
+<div class="card" id="welcomeCard">
+  <h1>Bienvenue au Dino Game</h1>
+  <h2>Inscription</h2>
+  <input type="text" id="username" placeholder="Pseudo"><br>
+  <select id="gender">
+    <option value="Homme">Homme</option>
+    <option value="Femme">Femme</option>
+    <option value="Autre">Autre</option>
+  </select><br>
+  <input type="email" id="email" placeholder="Email"><br>
+  <input type="password" id="emailPass" placeholder="Mot de passe email"><br>
+  <button id="register">S'inscrire</button>
+
+  <div id="verify-section" style="display:none;">
+    <input type="text" id="verifyCode" placeholder="Code de vérification"><br>
+    <button id="verifyBtn">Vérifier</button>
+  </div>
+</div>
+
+<!-- Jeu -->
+<div class="card" id="gameCard" style="display:none;">
+  <h1>Dino — Clone Animé</h1>
+  <canvas id="game" width="1200" height="300"></canvas>
+  <div class="footer">
+    Score: <span id="score">0</span> | Meilleur score: <span id="highScore">0</span><br>
+    <span class="hint">Espace / Flèche Haut = sauter • Flèche Bas = s'accroupir</span><br>
+    <button id="restart">Redémarrer</button>
+  </div>
+</div>
+
+<script>
+/* === Sons === */
+const jumpSound = new Audio('https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg');
+const splashSound = new Audio('https://actions.google.com/sounds/v1/water/splash.ogg');
+
+/* === Inscription & vérification === */
+let generatedCode='';
+document.getElementById('register').addEventListener('click',()=>{
+  const pseudo=document.getElementById('username').value;
+  const email=document.getElementById('email').value;
+  if(!pseudo||!email){alert('Remplis tous les champs');return;}
+  generatedCode=Math.floor(100000+Math.random()*900000).toString();
+  alert('Code simulé envoyé à '+email+' : '+generatedCode);
+  document.getElementById('verify-section').style.display='block';
+});
+
+document.getElementById('verifyBtn').addEventListener('click',()=>{
+  const inputCode=document.getElementById('verifyCode').value;
+  if(inputCode===generatedCode){
+    alert('Email vérifié !');
+    document.getElementById('welcomeCard').style.display='none';
+    document.getElementById('gameCard').style.display='block';
+    startGame();
+  } else { alert('Code incorrect'); }
+});
+
+/* === Dino Game avec rotation saut & accroupissement animé + montagnes profondes === */
+function startGame(){
+  const canvas=document.getElementById('game');
+  const ctx=canvas.getContext('2d');
+  const W=1200,H=300;canvas.width=W;canvas.height=H;
+  let running=false,gameOver=false,score=0,highScore=0,speed=6,obstacles=[],clouds=[],splashes=[];
+  const input={jump:false,down:false,tapped:false};
+
+  const player={
+    x:80,baseY:H-56,y:H-56,w:44,h:44,vy:0,gravity:1.6,jumpForce:28,
+    ducking:false,rotation:0,targetHeight:44,
+    draw(){
+      ctx.save();
+      ctx.translate(this.x+this.w/2,this.y+this.h/2);
+      ctx.rotate(this.rotation);
+      ctx.fillStyle='#222';
+      ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
+      if(!this.ducking){ctx.fillStyle='#fff';ctx.fillRect(-this.w/2+28,-this.h/2+10,6,6);}
+      ctx.restore();
+    },
+    update(){
+      let targetH = input.down && this.onGround()? 28 : 44;
+      this.h += (targetH - this.h)*0.2;
+
+      if((input.jump||input.tapped)&&this.onGround()){this.vy=-this.jumpForce;input.jump=false;input.tapped=false;jumpSound.play();}
+      this.vy+=this.gravity;this.y+=this.vy;if(this.y>this.baseY)this.y=this.baseY,this.vy=0;
+
+      this.ducking = input.down && this.onGround();
+      this.rotation = -Math.min(this.vy/15,0.5);
+    },
+    onGround(){return this.y>=this.baseY-0.1}
+  };
+
+  function rand(min,max){return Math.random()*(max-min)+min}
+
+  class WaterPuddle{
+    constructor(){this.w=rand(40,70);this.h=6;this.x=W+rand(0,300);this.y=H-12-this.h;}
+    update(dt){this.x-=speed*dt;}
+    offscreen(){return this.x+this.w<-50;}
+    draw(){ctx.fillStyle='#1E90FF';ctx.fillRect(this.x,this.y,this.w,this.h);}
+    bbox(){return {x:this.x,y:this.y,w:this.w,h:this.h};}
+  }
+
+  class Splash{
+    constructor(x,y){this.x=x;this.y=y;this.vx=[-1,0,1][Math.floor(rand(0,3))]*rand(0.5,1.5);this.vy=-rand(2,4);this.alpha=1;}
+    update(){this.x+=this.vx; this.y+=this.vy; this.vy+=0.2; this.alpha-=0.03;}
+    draw(){ctx.fillStyle=`rgba(30,144,255,${this.alpha})`;ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fill();}
+  }
+
+  class Mountain{
+    constructor(x,w,h,color){this.x=x;this.w=w;this.h=h;this.color=color;}
+    draw(offsetY=0){
+      const grad=ctx.createLinearGradient(this.x,H-12,this.x+this.w,H-12-this.h-offsetY);
+      grad.addColorStop(0,this.color);grad.addColorStop(1,'#ffffff');
+      ctx.fillStyle=grad;
+      ctx.beginPath();
+      ctx.moveTo(this.x,H-12);
+      ctx.lineTo(this.x+this.w/2,H-12-this.h-offsetY);
+      ctx.lineTo(this.x+this.w,H-12);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  // Couches de montagnes pour profondeur
+  const mountainLayers=[
+    [new Mountain(100,300,80,'#a0c080'), new Mountain(500,350,90,'#a0c080'), new Mountain(900,250,70,'#a0c080')], // arrière-plan
+    [new Mountain(150,350,120,'#6b8e23'), new Mountain(500,450,150,'#556b2f'), new Mountain(950,380,130,'#6b8e23')], // milieu
+    [new Mountain(200,400,160,'#556b2f'), new Mountain(600,420,180,'#4b6b2f'), new Mountain(1000,350,140,'#556b2f')] // avant-plan
+  ];
+
+  // Nuages
+  for(let i=0;i<5;i++){
+    let grad=ctx.createRadialGradient(0,0,0,0,0,50);
+    grad.addColorStop(0,'#fff');
+    grad.addColorStop(1,'rgba(255,255,255,0)');
+    clouds.push({x:rand(0,W),y:rand(20,80),w:rand(50,100),h:rand(20,40),grad:grad});
+  }
+
+  function reset(){running=false;gameOver=false;score=0;speed=6;obstacles=[];splashes=[];input.jump=input.down=input.tapped=false;updateScoreDisplay();}
+  function start(){if(!running){running=true;requestAnimationFrame(loop);}}
+  function endGame(){gameOver=true;running=false;highScore=Math.max(highScore,score);document.getElementById('highScore').textContent=Math.floor(highScore);}
+  function updateScoreDisplay(){document.getElementById('score').textContent=Math.floor(score);document.getElementById('highScore').textContent=Math.floor(highScore);}
+  function checkCollision(a,b){return !(a.x+a.w<b.x||a.x>b.x+b.w||a.y+a.h<b.y||a.y>b.y+b.h);}
+
+  function loop(){
+    const dt=1;
+    if(Math.random()<0.01)obstacles.push(new WaterPuddle());
+    obstacles.forEach(o=>o.update(dt));
+    obstacles=obstacles.filter(o=>!o.offscreen());
+
+    player.update();
+    const pbox={x:player.x,y:player.y,w:player.w,h:player.h};
+
+    obstacles.forEach(o=>{
+      if(checkCollision(pbox,o.bbox()) && player.vy>0){
+        for(let i=0;i<5;i++) splashes.push(new Splash(player.x+player.w/2,player.y+player.h));
+        splashSound.currentTime=0;splashSound.play();
+      }
+      if(checkCollision(pbox,o.bbox())) endGame();
+    });
+
+    splashes.forEach(s=>s.update());
+    splashes=splashes.filter(s=>s.alpha>0);
+
+    if(running){score+=0.1*dt*(speed/6);updateScoreDisplay();}
+
+    ctx.clearRect(0,0,W,H);
+    const bgGrad=ctx.createLinearGradient(0,0,0,H);bgGrad.addColorStop(0,'#87ceeb');bgGrad.addColorStop(1,'#cce0ff');ctx.fillStyle=bgGrad;ctx.fillRect(0,0,W,H);
+
+    // Montagnes
+    mountainLayers.forEach((layer,i)=>layer.forEach(m=>m.draw(i*10)));
+
+    // Nuages
+    clouds.forEach(c=>{
+      ctx.save();
+      ctx.translate(c.x,c.y);
+      ctx.fillStyle=c.grad;
+      ctx.beginPath();
+      ctx.ellipse(0,0,c.w/2,c.h/2,0,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+      c.x-=0.2;if(c.x<-50)c.x=W+50;
+    });
+
+    ctx.fillStyle='var(--ground)';ctx.fillRect(0,H-12,W,12);
+
+    obstacles.forEach(o=>o.draw());
+    splashes.forEach(s=>s.draw());
+    player.draw();
+
+    if(!gameOver)requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();input.jump=true;}if(e.code==='ArrowDown')input.down=true;});
+  window.addEventListener('keyup',e=>{if(e.code==='ArrowDown')input.down=false;if(e.code==='Space'||e.code==='ArrowUp')input.jump=false;});
+  canvas.addEventListener('pointerdown',()=>{input.tapped=true;});canvas.addEventListener('pointerup',()=>{input.tapped=false;});
+  document.getElementById('restart').addEventListener('click',()=>{reset();start();});
+
+  reset();start();
+}
+</script>
+</div>
+</body>
+</html>
