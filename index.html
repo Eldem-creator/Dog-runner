@@ -565,4 +565,146 @@ function startGame(){
       updateCoinDisplay();
       document.getElementById('highScore').textContent=Math.floor(highScore);
   }
-  function start(){if(!running){
+  function start(){if(!running){running=true;requestAnimationFrame(loop);}}
+function collectCoin(coinX, coinY){
+coinCount++;coinSound.currentTime=0;coinSound.play();updateCoinDisplay();
+for (let i = 0; i < 5; i++) {coinEffects.push(new CoinEffect(coinX + rand(0, 15), coinY));}
+}
+
+
+function takeHit(){
+if(isInvincible) return;lives--;hitSound.currentTime=0;hitSound.play();updateLivesDisplay();
+if(lives <= 0){endGame();} else {isInvincible = true;
+setTimeout(() => { isInvincible = false; }, 1500);
+}
+  }
+function endGame(){
+gameOver=true;
+running=false;
+gameOverSound.play();
+highScore=Math.max(highScore,score);
+document.getElementById('highScore').textContent=Math.floor(highScore);
+}
+function updateScoreDisplay(){document.getElementById('score').textContent=Math.floor(score);}
+function updateLivesDisplay(){document.getElementById('lives').textContent= '❤️'.repeat(lives) || '💔';}
+function updateCoinDisplay(){document.getElementById('coinCount').textContent = coinCount;}
+function checkCollision(a,b){return !(a.x+a.w<b.x||a.x>b.x+b.w||a.y+a.h<b.y||a.y>b.y+b.h);}
+
+
+function loop(){
+const dt=1;
+  // AUGMENTATION PROGRESSIVE DE LA VITESSE
+if(running) speed += 0.0005 * dt;
+// Logique de création d'objets (70% Pièce / 30% Trou)
+if(Math.random()<0.01){
+if(Math.random() < 0.3) {
+obstacles.push(new MoleHole());
+} else {
+coins.push(new Coin());
+}
+}
+
+
+// NOUVEAU : Logique de création des poteaux et buissons
+if (Math.random() < 0.005) posts.push(new Post());
+if (Math.random() < 0.02) bushes.push(new Bush());
+
+
+posts.forEach(p=>p.update(dt));
+posts=posts.filter(p=>!p.offscreen());
+
+
+bushes.forEach(b=>b.update(dt));
+bushes=bushes.filter(b=>!b.offscreen());
+
+
+obstacles.forEach(o=>o.update(dt));
+obstacles=obstacles.filter(o=>!o.offscreen());
+  coins.forEach(c=>c.update(dt));
+coins=coins.filter(c=>!c.offscreen());
+
+
+coinEffects.forEach(e => e.update());
+coinEffects = coinEffects.filter(e => e.alpha > 0);
+
+
+player.update();
+const pbox={x:player.x,y:player.y,w:player.w,h:player.h};
+
+
+// 1. Détection des collisions avec les obstacles
+obstacles.forEach(o=>{
+if(checkCollision(pbox,o.bbox())){
+if(running) takeHit();
+}
+});
+// 2. Détection des collisions avec les pièces (Collecte)
+for(let i = 0; i < coins.length; i++) {
+if(checkCollision(pbox, coins[i].bbox())) {
+collectCoin(coins[i].x, coins[i].y);
+coins.splice(i, 1);
+i--;
+  }
+  raindrops.forEach(r=>r.update());
+
+
+if(running){score+=0.1*dt*(speed/6);updateScoreDisplay();}
+
+
+// Dessin -----------------------------------
+ctx.clearRect(0,0,W,H);
+// Ciel (plus clair pour le contraste, mais toujours orageux)
+const bgGrad=ctx.createLinearGradient(0,0,0,H);bgGrad.addColorStop(0,'#87ceeb');bgGrad.addColorStop(1,'#a6dcef');ctx.fillStyle=bgGrad;ctx.fillRect(0,0,W,H);
+
+
+// Montagnes
+mountainLayers.forEach((layer,i)=>layer.forEach(m=>m.draw(i*10)));
+
+
+// Nuages (Style Pixel Art)
+clouds.forEach(c=>{
+ctx.fillStyle='rgba(255,255,255,0.9)';
+ctx.fillRect(c.x, c.y, 30, 10);
+ctx.fillRect(c.x + 5, c.y - 5, 20, 10);
+ctx.fillRect(c.x + 25, c.y + 2, 10, 5);
+c.x-=0.5;
+if(c.x < -40) c.x = W + rand(50, 200);
+});
+  // Gouttes de Pluie
+raindrops.forEach(r=>r.draw());
+
+
+// NOUVEAU : Dessin des POTEAUX (après les montagnes mais avant le sol)
+posts.forEach(p=>p.draw());
+
+
+ctx.fillStyle=groundColor;ctx.fillRect(0,H-12,W,12);
+
+
+// NOUVEAU : Dessin des BUISSONS (Juste au-dessus du sol)
+bushes.forEach(b=>b.draw());
+
+
+// Dessin des pièces, des obstacles, et des effets
+coins.forEach(c=>c.draw());
+obstacles.forEach(o=>o.draw());
+coinEffects.forEach(e => e.draw());
+
+
+player.draw();
+
+
+if(!gameOver)requestAnimationFrame(loop);
+  }
+window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();input.jump=true;}if(e.code==='ArrowDown')input.down=true;});
+window.addEventListener('keyup',e=>{if(e.code==='ArrowDown')input.down=false;if(e.code==='Space'||e.code==='ArrowUp')input.jump=false;});
+canvas.addEventListener('pointerdown',()=>{input.tapped=true;});canvas.addEventListener('pointerup',()=>{input.tapped=false;});
+document.getElementById('restart').addEventListener('click',()=>{reset();start();});
+
+
+reset();start();
+}
+</script>
+</div>
+</body>
+</html>
