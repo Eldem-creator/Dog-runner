@@ -3,708 +3,266 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dog Runner — Final System Alpha (Corrigé)</title>
+<title>Dog Runner — Classement Mondial</title>
 <style>
-/* --- Styles CSS --- */
-:root{
-  --bg:#1f2833; 
-  --card-bg:#0b0c10; 
-  --text:#c5c6c7; 
-  --primary:#66fcf1; 
-  --ground:#45a29e;
+:root {
+  --bg: #87ceeb;
+  --ground: #cce0aa;
+  --primary: #2b8bf2;
+  --text: #222;
+  --card-bg: #fff;
 }
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:'Segoe UI', Arial, sans-serif;background:var(--bg);color:var(--text)}
-.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;flex-direction:column}
-.card{
-  width:400px; max-width:90vw;
-  background: linear-gradient(145deg, var(--card-bg), #1a1a1a);
-  border-radius:16px;
-  box-shadow: 0 0 30px rgba(102, 252, 241, 0.2), 0 0 10px rgba(0,0,0,0.5); 
-  padding:32px 24px;
-  margin-bottom:24px;
-  text-align:center;
-  transition: transform 0.3s ease;
-  border: 1px solid var(--primary); 
-}
-.card:hover{transform: translateY(-4px); box-shadow: 0 0 40px var(--primary);}
-h1,h2{margin:0 0 20px 0;color:var(--primary); text-shadow: 0 0 5px var(--primary);}
-input, select{
-  width:90%;
-  padding:12px;
-  margin:10px 0;
-  border-radius:8px;
-  border:1px solid #333;
-  background: #242933; 
+
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: 'Poppins', sans-serif;
   color: var(--text);
-  transition: border 0.3s, box-shadow 0.3s;
-  font-size:14px;
-}
-input:focus,select:focus{
-  outline:none;
-  border-color:var(--primary);
-  box-shadow:0 0 10px rgba(102, 252, 241, 0.7);
-}
-button{
-  width:60%;
-  background:var(--primary);
-  color:var(--card-bg); 
-  border:0;
-  padding:12px;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer;
-  margin-top:16px;
-  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
-}
-button:hover{background:#45a29e;transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 252, 241, 0.5);}
-#verify-section{margin-top:16px; border-top: 1px dashed #444; padding-top: 15px;}
-.footer{margin-top:12px;font-size:14px;color:#555; display: flex; justify-content: space-between; flex-wrap: wrap;}
-.hint{font-size:12px;color:#666;margin-top:6px; display: block; width: 100%; text-align: center;}
-.stats{text-align: left; flex-grow: 1; color: var(--text); font-size: 14px;}
-.coins{text-align: right; flex-grow: 1; font-weight: bold; color: var(--primary);} 
-canvas{display:block;width:100%;height:300px;border-radius:6px; border: 2px solid var(--primary); box-shadow: 0 0 10px var(--primary);}
-
-/* Style spécifique pour le classement */
-#leaderboardCard {
-    width: 400px;
-    margin-top: 24px;
-}
-#leaderboardList {
-    list-style: none;
-    padding: 0;
-    text-align: left;
-    max-height: 200px;
-    overflow-y: auto;
-}
-#leaderboardList li {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px dotted #333;
-    font-size: 16px;
-}
-#leaderboardList li:first-child {
-    color: gold;
-    font-weight: bold;
-}
-.rank {
-    width: 20px;
-    font-weight: bold;
-}
-.lb-score {
-    color: var(--primary);
-    font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Pseudo Suggestion */
-#suggestion-box {
-    margin-top: 10px;
-    font-size: 12px;
-    color: #f00;
-    display: none; 
-    padding: 5px;
-    border: 1px solid #f00;
-    border-radius: 4px;
-    background: #2b1a1a;
-    width: 90%;
-    margin-left: auto;
-    margin-right: auto;
+canvas {
+  background: linear-gradient(var(--bg), var(--ground));
+  display: block;
+  margin-top: 10px;
+  border: 3px solid var(--primary);
+  border-radius: 12px;
 }
-#suggestion-box span {
-    color: var(--primary);
-    cursor: pointer;
-    text-decoration: underline;
-    margin: 0 5px;
+
+#ui {
+  margin-top: 10px;
+  text-align: center;
 }
+
+button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+
+#leaderboard {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  margin-top: 15px;
+  padding: 10px;
+  width: 300px;
+}
+
+#leaderboard h3 {
+  margin: 6px 0;
+  text-align: center;
+  color: var(--primary);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 4px;
+  border-bottom: 1px solid #ccc;
+  text-align: center;
+}
+
+tr:nth-child(1) { background: #ffd70044; }
+tr:nth-child(2) { background: #c0c0c044; }
+tr:nth-child(3) { background: #cd7f3244; }
 </style>
 </head>
 <body>
-<div class="wrap">
+<h1>🐾 Dog Runner — Classement Mondial 💰</h1>
 
-<div class="card" id="welcomeCard">
-  <h1>SYSTEME D'ACCÈS ALPHA</h1>
-  <h2>Authentification Utilisateur</h2>
-  <p style="color: #999; font-size: 14px;">Identifiant nécessaire pour la Synchronisation du Runner.</p>
-  <input type="text" id="username" placeholder="Code Nom (Pseudo)"><br>
-  <select id="gender">
-    <option value="Homme">Code H</option>
-    <option value="Femme">Code F</option>
-    <option value="Autre">Code X</option>
-  </select><br>
-  <input type="email" id="email" placeholder="Email de Contact Alpha"><br>
-  <input type="password" id="emailPass" placeholder="Mot de passe Haché"><br>
-  
-  <div id="suggestion-box">
-    Pseudo indisponible. Suggestions: 
-    <span id="sugg1"></span>, 
-    <span id="sugg2"></span>.
-  </div>
+<canvas id="game" width="600" height="250"></canvas>
 
-  <button id="register">INITIALISER LA VÉRIFICATION</button>
-
-  <div id="verify-section" style="display:none;">
-    <p style="color: #999; font-size: 14px;">Saisissez le code de confirmation reçu.</p>
-    <input type="text" id="verifyCode" placeholder="Code de Vérification"><br>
-    <button id="verifyBtn">ACTIVER LE RUNNER</button>
-  </div>
+<div id="ui">
+  <p id="player-info"></p>
+  <button id="start">▶️ Jouer</button>
+  <button id="logout">🚪 Déconnexion</button>
 </div>
 
-<div class="card" id="leaderboardCard">
-    <h2>TABLEAU DES RUNNERS</h2>
-    <ul id="leaderboardList">
-        <li>Chargement...</li>
-    </ul>
-    <button id="resetLeaderboard" style="width: 90%; margin-top: 10px; background: #900;">Réinitialiser Classement Local</button>
-</div>
-
-
-<div class="card" id="gameCard" style="display:none;">
-  <h1>DOG RUNNER | SYNCHRONISATION ACTIVE</h1>
-  <canvas id="game" width="1200" height="300"></canvas>
-  <div class="footer">
-    <div class="stats">
-      Runner: <span id="currentRunner">GUEST</span> | Vies: <span id="lives">❤️❤️❤️</span> | Score: <span id="score">0</span> | Meilleur score: <span id="highScore">0</span>
-    </div>
-    <div class="coins">
-      Pièces: <span id="coinCount">0</span> 💰
-    </div>
-    <span class="hint">Espace / Flèche Haut = sauter • Flèche Bas = s'accroupir</span><br>
-    <button id="restart">RÉINITIALISER LA SIMULATION</button>
-  </div>
+<div id="leaderboard">
+  <h3>🏆 Classement Mondial (basé sur les Coins)</h3>
+  <table id="leaderboard-table">
+    <thead><tr><th>Rang</th><th>Pseudo</th><th>Coins</th><th>Score Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <script>
-/* --- Logique JavaScript --- */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const groundY = canvas.height - 40;
 
-/* === Initialisation et Gestion des Comptes (LocalStorage) === */
-let currentUser = null; 
-const PLAYERS_STORAGE_KEY = 'dogRunnerPlayers';
+let player, obstacles, coins, score, coinsCollected, isPlaying;
+let speed = 4;
 
-// Compte Administrateur (Injecté au premier chargement)
-const ADMIN_ACCOUNT = {
-    username: "Eldem-creator",
-    email: "hermesigwabi@gmail.com",
-    emailPass: "hermes",
-    highScore: 999999 
-};
+// ==== AUTH / JOUEUR ====
+let currentPlayer = JSON.parse(localStorage.getItem("currentPlayer") || "null");
+let leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
 
-function ensureAdminAccount(players) {
-    const adminExists = players.some(p => p.email === ADMIN_ACCOUNT.email);
-    if (!adminExists) {
-        players.push(ADMIN_ACCOUNT);
-    } else {
-        const adminIndex = players.findIndex(p => p.email === ADMIN_ACCOUNT.email);
-        if (players[adminIndex].highScore < ADMIN_ACCOUNT.highScore) {
-             players[adminIndex].highScore = ADMIN_ACCOUNT.highScore;
-        }
-    }
-    return players;
-}
-
-function loadPlayers() {
-    const playersData = localStorage.getItem(PLAYERS_STORAGE_KEY);
-    let players = [];
-    try {
-        players = playersData ? JSON.parse(playersData) : [];
-        if (!Array.isArray(players)) players = [];
-    } catch (e) {
-        // Corrupted localStorage - reset
-        players = [];
-    }
-    players = ensureAdminAccount(players);
-    return players;
-}
-
-function savePlayers(players) {
-    localStorage.setItem(PLAYERS_STORAGE_KEY, JSON.stringify(players));
-    updateLeaderboardDisplay(); 
-}
-
-function updatePlayerScore(newScore) {
-    if (currentUser) {
-        let players = loadPlayers();
-        let playerIndex = players.findIndex(p => p.email === currentUser.email);
-        
-        if (playerIndex !== -1) {
-            if (newScore > players[playerIndex].highScore) {
-                players[playerIndex].highScore = newScore;
-                currentUser.highScore = newScore; 
-                savePlayers(players);
-                return newScore;
-            }
-            return players[playerIndex].highScore; 
-        }
-    }
-    return 0;
-}
-
-function isUsernameTaken(username) {
-    const players = loadPlayers();
-    return players.some(p => p.username && p.username.toLowerCase() === username.toLowerCase());
-}
-
-function suggestUsernames(base) {
-    const randomSuffix = Math.floor(Math.random() * 90) + 10; 
-    const suggestions = [
-        `${base}${randomSuffix}`,
-        `${base}-X`,
-    ];
-    return suggestions.filter(s => !isUsernameTaken(s));
+function saveLeaderboard() {
+  localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
 }
 
 function updateLeaderboardDisplay() {
-    const players = loadPlayers();
-    players.sort((a, b) => b.highScore - a.highScore);
-    
-    const list = document.getElementById('leaderboardList');
-    list.innerHTML = ''; 
-
-    if (players.length === 0) {
-        list.innerHTML = '<li>Aucun Runner enregistré.</li>';
-        return;
-    }
-
-    players.slice(0, 10).forEach((player, index) => { 
-        const li = document.createElement('li');
-        const rank = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-        
-        li.innerHTML = `
-            <span class="rank">${rank}</span>
-            <span>${player.username || player.email}</span>
-            <span class="lb-score">${Math.floor(player.highScore || 0)} pts</span>
-        `;
-        list.appendChild(li);
-    });
+  const tbody = document.querySelector("#leaderboard-table tbody");
+  leaderboard.sort((a,b)=>b.coins - a.coins);
+  tbody.innerHTML = leaderboard.map((p,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${p.name}</td>
+      <td>${p.coins}</td>
+      <td>${p.bestScore}</td>
+    </tr>
+  `).join('');
 }
 
-// Initial fill
+function promptLogin() {
+  let name = prompt("Entre ton pseudo :").trim();
+  if (!name) return promptLogin();
+  currentPlayer = leaderboard.find(p => p.name === name);
+  if (!currentPlayer) {
+    currentPlayer = { name, coins: 0, bestScore: 0 };
+    leaderboard.push(currentPlayer);
+    saveLeaderboard();
+  }
+  localStorage.setItem("currentPlayer", JSON.stringify(currentPlayer));
+  document.getElementById("player-info").textContent = `Connecté en tant que : ${name}`;
+  updateLeaderboardDisplay();
+}
+
+function logout() {
+  localStorage.removeItem("currentPlayer");
+  document.getElementById("player-info").textContent = "Déconnecté.";
+  currentPlayer = null;
+  promptLogin();
+}
+
+// ==== JEU ====
+function resetGame() {
+  player = { x: 50, y: groundY, w: 30, h: 30, vy: 0, jumping: false };
+  obstacles = [];
+  coins = [];
+  score = 0;
+  coinsCollected = 0;
+  isPlaying = true;
+}
+
+function jump() {
+  if (!player.jumping) {
+    player.vy = -9;
+    player.jumping = true;
+  }
+}
+
+function crouch(e) {
+  if (e.key === "ArrowDown") player.h = 15;
+}
+function stand(e) {
+  if (e.key === "ArrowDown") player.h = 30;
+}
+
+document.addEventListener("keydown", e=>{
+  if (e.code==="Space" || e.code==="ArrowUp") jump();
+  if (e.key==="ArrowDown") crouch(e);
+});
+document.addEventListener("keyup", stand);
+
+function update() {
+  if (!isPlaying) return;
+
+  player.vy += 0.5;
+  player.y += player.vy;
+  if (player.y >= groundY) {
+    player.y = groundY;
+    player.vy = 0;
+    player.jumping = false;
+  }
+
+  if (Math.random() < 0.02) obstacles.push({ x: canvas.width, y: groundY, w: 20, h: 30 });
+  if (Math.random() < 0.015) coins.push({ x: canvas.width, y: groundY - 50, r: 8 });
+
+  obstacles.forEach(o => o.x -= speed);
+  coins.forEach(c => c.x -= speed);
+
+  // collisions
+  for (let o of obstacles) {
+    if (player.x < o.x + o.w && player.x + player.w > o.x &&
+        player.y < o.y + o.h && player.y + player.h > o.y) {
+      gameOver();
+      return;
+    }
+  }
+
+  coins = coins.filter(c=>{
+    if (Math.abs(player.x - c.x) < 20 && Math.abs(player.y - c.y) < 20) {
+      coinsCollected++;
+      return false;
+    }
+    return c.x > -10;
+  });
+
+  score++;
+  draw();
+  requestAnimationFrame(update);
+}
+
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--ground');
+  ctx.fillRect(0,groundY+30,canvas.width,20);
+  ctx.fillStyle = "brown";
+  obstacles.forEach(o=>ctx.fillRect(o.x,o.y,o.w,o.h));
+  ctx.fillStyle = "gold";
+  coins.forEach(c=>{
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
+    ctx.fill();
+  });
+  ctx.fillStyle = "green";
+  ctx.fillRect(player.x, player.y - player.h, player.w, player.h);
+  ctx.fillStyle = "#000";
+  ctx.fillText(`Score: ${score}`, 10, 20);
+  ctx.fillText(`Coins: ${coinsCollected}`, 10, 40);
+}
+
+function gameOver() {
+  isPlaying = false;
+  alert("💥 Game Over !");
+  // mise à jour des données
+  currentPlayer.coins += coinsCollected;
+  currentPlayer.bestScore = Math.max(currentPlayer.bestScore, score);
+  const idx = leaderboard.findIndex(p=>p.name===currentPlayer.name);
+  if (idx >= 0) leaderboard[idx] = currentPlayer;
+  saveLeaderboard();
+  updateLeaderboardDisplay();
+}
+
+// ==== INIT ====
+document.getElementById("start").onclick = ()=>{
+  if (!currentPlayer) promptLogin();
+  resetGame();
+  update();
+};
+document.getElementById("logout").onclick = logout;
+
+if (!currentPlayer) promptLogin();
+else document.getElementById("player-info").textContent = `Connecté en tant que : ${currentPlayer.name}`;
+
 updateLeaderboardDisplay();
-
-document.getElementById('resetLeaderboard').addEventListener('click', () => {
-    if (confirm("Êtes-vous sûr de vouloir réinitialiser tout le classement local ? L'administrateur restera.")) {
-        let players = loadPlayers();
-        players = players.filter(p => p.email === ADMIN_ACCOUNT.email); 
-        if (players.length === 0) players = [ADMIN_ACCOUNT];
-        players[0].highScore = ADMIN_ACCOUNT.highScore;
-
-        localStorage.setItem(PLAYERS_STORAGE_KEY, JSON.stringify(players));
-        updateLeaderboardDisplay();
-        alert("Classement local réinitialisé ! L'administrateur reste seul.");
-    }
-});
-
-
-/* === Sons et Utilitaires === */
-const jumpSound = new Audio('https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg');
-const hitSound = new Audio('https://actions.google.com/sounds/v1/impacts/punch.ogg');
-const gameOverSound = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_chime.ogg');
-const coinSound = new Audio('https://actions.google.com/sounds/v1/coins/coin_single.ogg');
-
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-document.getElementById('suggestion-box').addEventListener('click', (e) => {
-    if (e.target && e.target.tagName === 'SPAN') {
-        document.getElementById('username').value = e.target.textContent;
-        document.getElementById('suggestion-box').style.display = 'none';
-    }
-});
-
-
-/* === Inscription & vérification === */
-let generatedCode='';
-document.getElementById('register').addEventListener('click',()=>{
-  const username=document.getElementById('username').value.trim(); 
-  const email=document.getElementById('email').value.trim();
-  const emailPass=document.getElementById('emailPass').value;
-  
-  document.getElementById('suggestion-box').style.display = 'none';
-
-  if(!username||!email||!emailPass){
-      alert('Erreur: Veuillez remplir tous les champs Alpha.');
-      return;
-  }
-  
-  if(!isValidEmail(email)){
-      alert('Erreur: Le format de l\'Email de Contact Alpha n\'est pas valide. Veuillez vérifier l\'adresse.');
-      return;
-  }
-  
-  let players = loadPlayers();
-  let existingPlayer = players.find(p => p.email === email);
-  let isNewRegistration = !existingPlayer;
-
-  if (isNewRegistration && isUsernameTaken(username)) {
-    const suggestions = suggestUsernames(username);
-    document.getElementById('sugg1').textContent = suggestions[0] || 'Runner1';
-    document.getElementById('sugg2').textContent = suggestions[1] || 'Runner2';
-    document.getElementById('suggestion-box').style.display = 'block';
-
-    alert("Erreur: Ce Code Nom (Pseudo) est déjà utilisé par un Runner. Veuillez choisir une suggestion ou en créer un autre.");
-    return;
-  }
-  
-  if (existingPlayer) {
-      // CONNEXION
-      if (existingPlayer.emailPass !== emailPass) {
-          alert("Erreur: Mot de passe haché incorrect pour cet Email de Contact Alpha.");
-          return;
-      }
-      
-      if (existingPlayer.username !== username) {
-          existingPlayer.username = username;
-          savePlayers(players);
-      }
-
-      currentUser = existingPlayer;
-      alert(`Synchronisation Runner Alpha réussie. Bienvenue de retour, ${currentUser.username} !`);
-      document.getElementById('welcomeCard').style.display='none';
-      document.getElementById('gameCard').style.display='block';
-      startGame();
-  } else {
-      // NOUVELLE INSCRIPTION
-      generatedCode=Math.floor(100000+Math.random()*900000).toString();
-      
-      // Stocke les données du nouveau compte en attente de vérification
-      currentUser = { username, email, emailPass, highScore: 0 };
-      
-      alert('Code de synchronisation envoyé à '+email+' : '+generatedCode);
-      document.getElementById('verify-section').style.display='block';
-  }
-});
-
-document.getElementById('verifyBtn').addEventListener('click',()=>{
-  const inputCode=document.getElementById('verifyCode').value;
-  
-  if (!currentUser) {
-       alert("Erreur: Veuillez d'abord cliquer sur INITIALISER LA VÉRIFICATION.");
-       return;
-  }
-
-  if(inputCode===generatedCode){
-    let players = loadPlayers();
-    
-    // Vérification finale du pseudo (si l'utilisateur a changé d'avis)
-    if (isUsernameTaken(currentUser.username) && !players.some(p => p.email === currentUser.email)) {
-        alert("Erreur critique: Le pseudo a été pris. Veuillez recommencer l'inscription.");
-        return;
-    }
-    
-    players.push(currentUser);
-    savePlayers(players);
-
-    alert('Accès Alpha Vérifié. Lancement de la Simulation...');
-    document.getElementById('welcomeCard').style.display='none';
-    document.getElementById('gameCard').style.display='block';
-    startGame();
-  } else { alert('Erreur: Code de Vérification incorrect. Tentative Annulée.'); }
-});
-
-/* === Dog Runner Game === */
-function startGame(){
-  const canvas=document.getElementById('game');
-  const ctx=canvas.getContext('2d');
-  const W=1200,H=300;canvas.width=W;canvas.height=H;
-  const groundColor = getComputedStyle(document.documentElement).getPropertyValue('--ground') || '#45a29e';
-  
-  document.getElementById('currentRunner').textContent = currentUser ? currentUser.username : 'GUEST';
-
-  let initialHighScore = currentUser ? updatePlayerScore(0) : 0; 
-
-  let running=false,gameOver=false,lives=3,score=0,highScore=initialHighScore,coinCount=0,speed=6,obstacles=[],coins=[],clouds=[],raindrops=[],coinEffects=[],posts=[],bushes=[]; 
-  const input={jump:false,down:false,tapped:false};
-  let isInvincible = false;
-
-    const player={
-    x:80,baseY:H-36,y:H-36,w:30,h:30,vy:0,gravity:1.6,jumpForce:20,
-    ducking:false,rotation:0,targetHeight:30,
-    
-    draw(){
-      const pixelSize = 6;
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.rotate(this.rotation);
-      
-      if (isInvincible && Math.floor(Date.now()/100) % 2 === 0) {
-        ctx.fillStyle='#f00';
-      } else {
-        ctx.fillStyle='#222';
-      }
-
-      if(!this.ducking){
-          ctx.fillRect(0 * pixelSize, 1 * pixelSize, 6 * pixelSize, 3 * pixelSize);
-          ctx.fillRect(5 * pixelSize, 2 * pixelSize, 1 * pixelSize, 1 * pixelSize);
-          ctx.fillStyle='#fff';
-          ctx.fillRect(4 * pixelSize, 1 * pixelSize, 1 * pixelSize, 1 * pixelSize);
-          ctx.fillStyle='#222';
-          ctx.fillRect(0, 2 * pixelSize, 2 * pixelSize, 1 * pixelSize);
-          ctx.fillRect(2 * pixelSize, 3 * pixelSize, 1 * pixelSize, 1 * pixelSize);
-          ctx.fillRect(4 * pixelSize, 3 * pixelSize, 1 * pixelSize, 1 * pixelSize);
-      } else {
-          ctx.fillRect(0 * pixelSize, 1 * pixelSize, 5 * pixelSize, 2 * pixelSize);
-          ctx.fillRect(0 * pixelSize, 2 * pixelSize, 1 * pixelSize, 1 * pixelSize);
-          ctx.fillRect(4 * pixelSize, 2 * pixelSize, 1 * pixelSize, 1 * pixelSize);
-      }
-      ctx.restore();
-    },
-    update(){
-      let targetH = input.down && this.onGround()? 18 : 30;
-      this.h += (targetH - this.h)*0.2;
-
-      if((input.jump||input.tapped)&&this.onGround()){this.vy=-this.jumpForce;input.jump=false;input.tapped=false;jumpSound.play();}
-      this.vy+=this.gravity;this.y+=this.vy;if(this.y>this.baseY)this.y=this.baseY,this.vy=0;
-
-      this.ducking = input.down && this.onGround();
-      this.rotation = -Math.min(this.vy/15,0.5);
-    },
-    onGround(){return this.y>=this.baseY-0.1}
-  };
-
-  function rand(min,max){return Math.random()*(max-min)+min}
-
-  class MoleHole{
-    constructor(){this.w=rand(35,50);this.h=10;this.x=W+rand(0,300);this.y=H-12-this.h;}
-    update(dt){this.x-=speed*dt;}
-    offscreen(){return this.x+this.w<-50;}
-    draw(){
-      ctx.fillStyle='#3D241E'; ctx.beginPath();
-      ctx.arc(this.x + this.w / 2, H - 12, this.w / 2, 0, Math.PI, true);
-      ctx.fill();
-    }
-    bbox(){return {x:this.x,y:this.y,w:this.w,h:this.h};}
-  }
-
-  class Coin{
-    constructor(){
-      this.w=15;this.h=15;this.x=W+rand(0,W);this.y=rand(H-50, H-25-this.h); 
-    }
-    update(dt){this.x-=speed*dt;}
-    offscreen(){return this.x+this.w<-50;}
-    draw(){
-      ctx.fillStyle='#FFD700';ctx.fillRect(this.x, this.y, this.w, this.h);
-      ctx.fillStyle='rgba(255,255,255,0.6)';ctx.fillRect(this.x+2, this.y+2, 3, 3);
-    }
-    bbox(){return {x:this.x,y:this.y,w:this.w,h:this.h};}
-  }
-
-  class CoinEffect {
-    constructor(x, y) {
-        this.x = x;this.y = y;this.vy = -rand(3, 5);this.alpha = 1;this.size = rand(2, 4);
-    }
-    update() {
-        this.y += this.vy;this.vy += 0.2;this.alpha -= 0.05;
-    }
-    draw() {ctx.fillStyle = `rgba(255, 255, 0, ${this.alpha})`;ctx.fillRect(this.x, this.y, this.size, this.size);} 
-  }
-
-  class Raindrop{
-    constructor(){this.x=rand(0,W);this.y=rand(-200,-50);this.l=rand(10,20);this.v=rand(8,15);} 
-    update(){this.y+=this.v;if(this.y>H)this.y=rand(-200,-50);} 
-    draw(){ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(this.x,this.y);ctx.lineTo(this.x,this.y+this.l);ctx.stroke();}
-  }
-  for(let i=0;i<50;i++){raindrops.push(new Raindrop());}
-
-  class Post {
-    constructor() {
-        this.w = 4;this.h = rand(70, 100);this.x = W + rand(0, W * 2);this.y = H - 12 - this.h;
-        this.speedFactor = rand(1.2, 1.5); 
-    }
-    update(dt) { this.x -= (speed * this.speedFactor) * dt * 0.5; }
-    offscreen() { return this.x + this.w < -50; }
-    draw() {
-        ctx.fillStyle = '#444'; ctx.fillRect(this.x, this.y, this.w, this.h);
-        ctx.strokeStyle = '#222';ctx.lineWidth = 1;ctx.beginPath();
-        ctx.moveTo(this.x + this.w, this.y + 10);ctx.lineTo(this.x + this.w + 100, this.y + 8);
-        ctx.stroke();
-    }
-  }
-
-  class Bush {
-    constructor() {
-        this.x = W + rand(0, W);this.y = H - 12;this.w = rand(15, 30);this.h = rand(10, 15);
-    }
-    update(dt) { this.x -= speed * dt * 0.9; } 
-    offscreen() { return this.x + this.w < -20; }
-    draw() {
-        ctx.fillStyle = '#6b8e23';ctx.beginPath();
-        ctx.arc(this.x + this.w / 2, this.y - this.h / 2, this.w / 2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillRect(this.x, this.y - 5, this.w, 5);
-    }
-  }
-
-  class Mountain{
-    constructor(x,w,h,color){this.x=x;this.w=w;this.h=h;this.color=color;}
-    draw(offsetY=0){
-      const grad=ctx.createLinearGradient(this.x,H-12,this.x+this.w,H-12-this.h-offsetY);
-      grad.addColorStop(0,this.color);grad.addColorStop(1,'#ffffff');
-      ctx.fillStyle=grad;ctx.beginPath();ctx.moveTo(this.x,H-12);
-      ctx.lineTo(this.x+this.w/2,H-12-this.h-offsetY);ctx.lineTo(this.x+this.w,H-12);
-      ctx.closePath();ctx.fill();
-    }
-  }
-
-  const mountainLayers=[
-    [new Mountain(100,300,80,'#7b9e7b'), new Mountain(500,350,90,'#7b9e7b'), new Mountain(900,250,70,'#7b9e7b')],
-    [new Mountain(150,350,120,'#5b7e5b'), new Mountain(500,450,150,'#4a6e4a'), new Mountain(950,380,130,'#5b7e5b')],
-    [new Mountain(200,400,160,'#4a6e4a'), new Mountain(600,420,180,'#3a5e3a'), new Mountain(1000,350,140,'#4a6e4a')]
-  ];
-
-  for(let i=0;i<5;i++){
-    clouds.push({x:rand(0,W),y:rand(20,80),w:rand(50,100),h:rand(20,40)});
-  }
-  
-  function reset(){
-      running=false;gameOver=false;lives=3;score=0;speed=6;obstacles=[];coins=[];coinEffects=[];posts=[];bushes=[];
-      input.jump=input.down=input.tapped=false;
-      updateScoreDisplay();
-      updateLivesDisplay();
-      updateCoinDisplay();
-      document.getElementById('highScore').textContent=Math.floor(highScore);
-  }
-  function start(){if(!running){running=true;requestAnimationFrame(loop);}}
-function collectCoin(coinX, coinY){
-coinCount++;coinSound.currentTime=0;coinSound.play();updateCoinDisplay();
-for (let i = 0; i < 5; i++) {coinEffects.push(new CoinEffect(coinX + rand(0, 15), coinY));}
-}
-
-
-function takeHit(){
-if(isInvincible) return;lives--;hitSound.currentTime=0;hitSound.play();updateLivesDisplay();
-if(lives <= 0){endGame();} else {isInvincible = true;
-setTimeout(() => { isInvincible = false; }, 1500);
-}
-  }
-function endGame(){
-gameOver=true;
-running=false;
-gameOverSound.play();
-highScore=Math.max(highScore,score);
-document.getElementById('highScore').textContent=Math.floor(highScore);
-}
-function updateScoreDisplay(){document.getElementById('score').textContent=Math.floor(score);}
-function updateLivesDisplay(){document.getElementById('lives').textContent= '❤️'.repeat(lives) || '💔';}
-function updateCoinDisplay(){document.getElementById('coinCount').textContent = coinCount;}
-function checkCollision(a,b){return !(a.x+a.w<b.x||a.x>b.x+b.w||a.y+a.h<b.y||a.y>b.y+b.h);}
-
-
-function loop(){
-const dt=1;
-  // AUGMENTATION PROGRESSIVE DE LA VITESSE
-if(running) speed += 0.0005 * dt;
-// Logique de création d'objets (70% Pièce / 30% Trou)
-if(Math.random()<0.01){
-if(Math.random() < 0.3) {
-obstacles.push(new MoleHole());
-} else {
-coins.push(new Coin());
-}
-}
-
-
-// NOUVEAU : Logique de création des poteaux et buissons
-if (Math.random() < 0.005) posts.push(new Post());
-if (Math.random() < 0.02) bushes.push(new Bush());
-
-
-posts.forEach(p=>p.update(dt));
-posts=posts.filter(p=>!p.offscreen());
-
-
-bushes.forEach(b=>b.update(dt));
-bushes=bushes.filter(b=>!b.offscreen());
-
-
-obstacles.forEach(o=>o.update(dt));
-obstacles=obstacles.filter(o=>!o.offscreen());
-  coins.forEach(c=>c.update(dt));
-coins=coins.filter(c=>!c.offscreen());
-
-
-coinEffects.forEach(e => e.update());
-coinEffects = coinEffects.filter(e => e.alpha > 0);
-
-
-player.update();
-const pbox={x:player.x,y:player.y,w:player.w,h:player.h};
-
-
-// 1. Détection des collisions avec les obstacles
-obstacles.forEach(o=>{
-if(checkCollision(pbox,o.bbox())){
-if(running) takeHit();
-}
-});
-// 2. Détection des collisions avec les pièces (Collecte)
-for(let i = 0; i < coins.length; i++) {
-if(checkCollision(pbox, coins[i].bbox())) {
-collectCoin(coins[i].x, coins[i].y);
-coins.splice(i, 1);
-i--;
-  }
-  raindrops.forEach(r=>r.update());
-
-
-if(running){score+=0.1*dt*(speed/6);updateScoreDisplay();}
-
-
-// Dessin -----------------------------------
-ctx.clearRect(0,0,W,H);
-// Ciel (plus clair pour le contraste, mais toujours orageux)
-const bgGrad=ctx.createLinearGradient(0,0,0,H);bgGrad.addColorStop(0,'#87ceeb');bgGrad.addColorStop(1,'#a6dcef');ctx.fillStyle=bgGrad;ctx.fillRect(0,0,W,H);
-
-
-// Montagnes
-mountainLayers.forEach((layer,i)=>layer.forEach(m=>m.draw(i*10)));
-
-
-// Nuages (Style Pixel Art)
-clouds.forEach(c=>{
-ctx.fillStyle='rgba(255,255,255,0.9)';
-ctx.fillRect(c.x, c.y, 30, 10);
-ctx.fillRect(c.x + 5, c.y - 5, 20, 10);
-ctx.fillRect(c.x + 25, c.y + 2, 10, 5);
-c.x-=0.5;
-if(c.x < -40) c.x = W + rand(50, 200);
-});
-  // Gouttes de Pluie
-raindrops.forEach(r=>r.draw());
-
-
-// NOUVEAU : Dessin des POTEAUX (après les montagnes mais avant le sol)
-posts.forEach(p=>p.draw());
-
-
-ctx.fillStyle=groundColor;ctx.fillRect(0,H-12,W,12);
-
-
-// NOUVEAU : Dessin des BUISSONS (Juste au-dessus du sol)
-bushes.forEach(b=>b.draw());
-
-
-// Dessin des pièces, des obstacles, et des effets
-coins.forEach(c=>c.draw());
-obstacles.forEach(o=>o.draw());
-coinEffects.forEach(e => e.draw());
-
-
-player.draw();
-
-
-if(!gameOver)requestAnimationFrame(loop);
-  }
-window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();input.jump=true;}if(e.code==='ArrowDown')input.down=true;});
-window.addEventListener('keyup',e=>{if(e.code==='ArrowDown')input.down=false;if(e.code==='Space'||e.code==='ArrowUp')input.jump=false;});
-canvas.addEventListener('pointerdown',()=>{input.tapped=true;});canvas.addEventListener('pointerup',()=>{input.tapped=false;});
-document.getElementById('restart').addEventListener('click',()=>{reset();start();});
-
-
-reset();start();
-}
 </script>
-</div>
 </body>
 </html>
